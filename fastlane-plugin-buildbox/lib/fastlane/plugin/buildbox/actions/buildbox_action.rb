@@ -59,7 +59,7 @@ module Fastlane
         file.close()
 
         unless uploadResponse.status.success?
-          UI.user_error!("Attempt to authenticate failed, Code: #{uploadResponse.code}, Des: #{uploadResponse.body}")
+          UI.user_error!("Attempt to upload failed, Code: #{uploadResponse.code}, Des: #{uploadResponse.body}")
         end
 
         puts "Finished IPA upload"
@@ -70,7 +70,7 @@ module Fastlane
       end
 
       def self.authors
-        ["Andrew Springham"]
+        ["BuildBox"]
       end
 
       def self.return_value
@@ -78,7 +78,6 @@ module Fastlane
       end
 
       def self.details
-        # Optional:
         "Fastlane plugin to upload builds to BuildBox"
       end
 
@@ -116,11 +115,7 @@ module Fastlane
       end
 
       def self.is_supported?(platform)
-        # Adjust this if your plugin only works for a particular platform (iOS vs. Android, for example)
-        # See: https://docs.fastlane.tools/advanced/#control-configuration-by-lane-and-by-platform
-        #
-        # [:ios, :mac, :android].include?(platform)
-        true
+        [:ios].include?(platform)
       end
     end
   end
