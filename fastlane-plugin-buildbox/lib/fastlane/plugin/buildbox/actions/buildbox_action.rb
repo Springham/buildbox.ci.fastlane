@@ -53,7 +53,8 @@ module Fastlane
           appFile: HTTP::FormData::File.new(file),
           releaseNotes: params[:release_notes],
           projectIdentifier: params[:project_identifier],
-          projectDisplay: params[:project_display]
+          projectDisplay: params[:project_display],
+          taskIDs: params[:task_ids]
         })
 
         file.close()
@@ -110,7 +111,13 @@ module Fastlane
                                   env_name: "BUILDBOX_PROJECT_DISPLAY",
                                description: "Display name for project",
                                   optional: true,
-                                      type: String)
+                                      type: String),
+
+          FastlaneCore::ConfigItem.new(key: :task_ids,
+                                  env_name: "BUILDBOX_TASK_IDS",
+                               description: "Task IDs added in this build",
+                                  optional: true,
+                                      type: Array)
         ]
       end
 
