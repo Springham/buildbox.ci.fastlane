@@ -23,16 +23,13 @@ module Fastlane
 
         baseUri = 'https://buildbox.azurewebsites.net'
 
-        accessHttp = HTTP
-          .accept(:json)
-
-        token = params[:token]
-
         puts "Fetching Access Token"
 
-        accessResponse = accessHttp.get("#{baseUri}/build/accesstoken", :json => {
-          :token => token
-        })
+        accessResponse = HTTP
+          .accept(:json)
+          .get("#{baseUri}/build/accesstoken", :json => {
+            :token => params[:token]
+          })
 
         unless accessResponse.status.success?
           UI.user_error!("Attempt to authenticate failed, Code: #{accessResponse.code}, Des: #{accessResponse.body}")
@@ -41,29 +38,60 @@ module Fastlane
         accessResponseBody = JSON.parse(accessResponse.body.to_s)
         accessToken = accessResponseBody["accessToken"]
 
-        file = File.open(filePath)
-
-        puts "Uploading IPA"
+        puts "Fetched Access Token"
 
         http = HTTP
           .headers("Authorization" => "Bearer #{accessToken}")
           .accept(:json)
 
-        uploadResponse = http.post("#{baseUri}/build", form: { 
-          appFile: HTTP::FormData::File.new(file),
-          releaseNotes: params[:release_notes],
-          projectIdentifier: params[:project_identifier],
-          projectDisplay: params[:project_display],
-          taskIDs: params[:task_ids]
-        })
+        puts "Reserving Upload"
+
+        reserveUploadResponse = http
+          .get("#{baseUri}/build/reserveupload", :json => {
+          })
+
+        unless reserveUploadResponse.status.success?
+          UI.user_error!("Attempt to reserve upload failed, Code: #{accessResponse.code}, Des: #{accessResponse.body}")
+        end
+
+        reserveUploadResponseBody = JSON.parse(reserveUploadResponse.body.to_s)
+        uploadUrl = reserveUploadResponseBody["uploadUrl"]
+        uploadName = reserveUploadResponseBody["uploadID"]
+
+        puts "Reserved Upload. Upload Name: #{uploadName}"
+
+        puts "Uploading blob"
+
+        file = File.open(filePath)
+
+        fileUploadResponse = HTTP.headers("x-ms-blob-type" => "BlockBlob")
+          .put(uploadUrl, body: File.new(file))
+
+        unless fileUploadResponse.status.success?
+          UI.user_error!("Attempt to upload build file failed, Code: #{accessResponse.code}, Des: #{accessResponse.body}")
+        end
 
         file.close()
 
-        unless uploadResponse.status.success?
-          UI.user_error!("Attempt to upload failed, Code: #{uploadResponse.code}, Des: #{uploadResponse.body}")
+        puts "Uploaded blob"
+
+        puts "Registering upload"
+
+        registerUploadResponse = http.post("#{baseUri}/build/registerupload", :json => {
+          :uploadName => uploadName,
+          :releaseNotes => params[:release_notes],
+          :projectIdentifier => params[:project_identifier],
+          :projectDisplay => params[:project_display],
+          :taskIDs => params[:task_ids]
+        })
+
+        unless registerUploadResponse.status.success?
+          UI.user_error!("Attempt to register upload failed, Code: #{accessResponse.code}, Des: #{accessResponse.body}")
         end
 
-        puts "Finished IPA upload"
+        puts "Registered upload"
+
+        puts "Finished Upload"
       end
 
       def self.description
