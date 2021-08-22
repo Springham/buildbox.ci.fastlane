@@ -7,14 +7,22 @@ module Fastlane
       def self.run(params)
         require "http"
 
-        UI.message("The BuildBox plugin is working!")
+        platformName = lane_context[SharedValues::PLATFORM_NAME]
 
-        accepted_formats = [".ipa"]
+        UI.message("BuildBox upload plugin initiated. Platform: #{platformName}")
+
+        if platformName == "ios"
+          accepted_formats = [".ipa"]
+        elsif platformName == "android"
+          accepted_formats = [".apk"]
+        else
+          UI.user_error!("Unknown platform")
+        end
 
         filePath = params[:package_path]
 
         unless accepted_formats.include? File.extname(filePath)
-          UI.user_error!("File must be an IPA")
+          UI.user_error!("File must be an IPA for iOS and APK for Android")
         end
 
         unless File.exist?(filePath)
@@ -79,6 +87,7 @@ module Fastlane
 
         registerUploadResponse = http.post("#{baseUri}/build/registerupload", :json => {
           :uploadName => uploadName,
+          :platform => platformName,
           :releaseNotes => params[:release_notes],
           :projectIdentifier => params[:project_identifier],
           :projectDisplay => params[:project_display],
@@ -119,7 +128,7 @@ module Fastlane
                                       type: String),
           FastlaneCore::ConfigItem.new(key: :package_path,
                                   env_name: "BUILDBOX_PACKAGE_PATH",
-                               description: "Path to IPA",
+                               description: "Path to app package (ipa or apk)",
                                   optional: false,
                                       type: String),
 
@@ -150,7 +159,7 @@ module Fastlane
       end
 
       def self.is_supported?(platform)
-        [:ios].include?(platform)
+        [:ios, :android].include?(platform)
       end
     end
   end

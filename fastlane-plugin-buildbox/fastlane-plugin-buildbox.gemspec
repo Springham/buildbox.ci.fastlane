@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.email         = 'ajspringham@gmail.com'
 
   spec.summary       = 'Fastlane plugin to upload builds to BuildBox'
-  # spec.homepage      = "https://github.com/<GITHUB_USERNAME>/fastlane-plugin-buildbox"
+  spec.homepage      = "https://github.com/Springham/buildbox.ci.fastlane"
   spec.license       = "MIT"
 
   spec.files         = Dir["lib/**/*"] + %w(README.md LICENSE)
