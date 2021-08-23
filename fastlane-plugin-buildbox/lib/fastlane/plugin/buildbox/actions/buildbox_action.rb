@@ -7,26 +7,22 @@ module Fastlane
       def self.run(params)
         require "http"
 
-        platformName = lane_context[SharedValues::PLATFORM_NAME]
-
-        if platformName.nil? || platformName.empty?
-          platformName = lane_context[SharedValues::DEFAULT_PLATFORM]
-        end
-
-        UI.message("BuildBox upload plugin initiated. Platform: #{platformName}")
-
-        if platformName == "ios"
-          accepted_formats = [".ipa"]
-        elsif platformName == "android"
-          accepted_formats = [".apk"]
-        else
-          UI.user_error!("Unknown platform")
-        end
+        UI.message("BuildBox upload plugin initiated")
 
         filePath = params[:package_path]
 
-        unless accepted_formats.include? File.extname(filePath)
-          UI.user_error!("File must be an IPA for iOS and APK for Android")
+        if File.extname(filePath) == ".ipa"
+          platformName = "iOS"
+          UI.message("IPA detected")
+        elsif File.extname(filePath) == ".apk"
+          platformName = "Android"
+          UI.message("APK detected")
+        else
+          UI.user_error!("File  must be an IPA for iOS and APK for Android")
+        end
+
+        unless [".ipa", ".apk"].include? File.extname(filePath)
+          UI.user_error!("File  must be an IPA for iOS and APK for Android")
         end
 
         unless File.exist?(filePath)
