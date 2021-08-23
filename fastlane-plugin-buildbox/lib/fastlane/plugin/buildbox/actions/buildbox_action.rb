@@ -9,6 +9,10 @@ module Fastlane
 
         platformName = lane_context[SharedValues::PLATFORM_NAME]
 
+        if platformName.nil? || platformName.empty?
+          platformName = lane_context[SharedValues::DEFAULT_PLATFORM]
+        end
+
         UI.message("BuildBox upload plugin initiated. Platform: #{platformName}")
 
         if platformName == "ios"
