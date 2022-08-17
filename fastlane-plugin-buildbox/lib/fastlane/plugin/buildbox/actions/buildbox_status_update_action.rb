@@ -71,8 +71,6 @@ module Fastlane
 
       def self.available_options
         [
-          :projectIdentifier => params[:project_identifier]
-
           FastlaneCore::ConfigItem.new(key: :token,
                                   env_name: "TESTSHIP_TOKEN",
                                description: "CI Token for auth",
