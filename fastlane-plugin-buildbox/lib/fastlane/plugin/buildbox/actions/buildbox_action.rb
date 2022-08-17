@@ -59,7 +59,7 @@ module Fastlane
           })
 
         unless reserveUploadResponse.status.success?
-          UI.user_error!("Attempt to reserve upload failed, Code: #{accessResponse.code}, Des: #{accessResponse.body}")
+          UI.user_error!("Attempt to reserve upload failed, Code: #{reserveUploadResponse.code}, Des: #{reserveUploadResponse.body}")
         end
 
         reserveUploadResponseBody = JSON.parse(reserveUploadResponse.body.to_s)
@@ -76,7 +76,7 @@ module Fastlane
           .put(uploadUrl, body: File.new(file))
 
         unless fileUploadResponse.status.success?
-          UI.user_error!("Attempt to upload build file failed, Code: #{accessResponse.code}, Des: #{accessResponse.body}")
+          UI.user_error!("Attempt to upload build file failed, Code: #{fileUploadResponse.code}, Des: #{fileUploadResponse.body}")
         end
 
         file.close()
@@ -95,7 +95,7 @@ module Fastlane
         })
 
         unless registerUploadResponse.status.success?
-          UI.user_error!("Attempt to register upload failed, Code: #{accessResponse.code}, Des: #{accessResponse.body}")
+          UI.user_error!("Attempt to register upload failed, Code: #{registerUploadResponse.code}, Des: #{registerUploadResponse.body}")
         end
 
         puts "Registered upload"
